@@ -25,7 +25,8 @@ module dot11_tx
   input  wire        result_iq_ready,
   output wire        result_iq_valid,
   output wire [15:0] result_i,
-  output wire [15:0] result_q
+  output wire [15:0] result_q,
+  input wire  [7:0] num_stf_minus
 );
 
 reg  FSM3_reset;        // Reset after transmiting a whole packet
@@ -82,11 +83,15 @@ reg [14:0] ofdm_cnt_FSM1;       // Maximum number of OFDM symbols = 3 + ceil((16
 // LEGACY SHORT + LONG PREAMBLE
 //////////////////////////////////////////////////////////////////////////
 wire [31:0] l_stf;
+wire [31:0] l_stf_tmp;
 wire [31:0] l_ltf;
 reg  [7:0] preamble_addr;
+reg  [7:0] num_stf;
+
+assign l_stf = preamble_addr >= num_stf? 0:l_stf_tmp;
 l_stf_rom l_stf_rom (
-    .addr(preamble_addr[3:0]),
-    .dout(l_stf)
+    .addr(preamble_addr),
+    .dout(l_stf_tmp)
 );
 
 l_ltf_rom l_ltf_rom (
@@ -738,7 +743,7 @@ if (reset_int) begin
     preamble_addr <= 0;
     phy_tx_done <= 0;
     FSM3_reset <= 0;
-
+    num_stf <= 160 - num_stf_minus;
     state3 <= S3_WAIT_PKT;
 
 end else if(result_iq_ready == 1) begin
