@@ -1,3 +1,9 @@
+# Disclaimer
+
+This project is a fork (modified version) of [open-sdr/openwifi-hw](https://github.com/open-sdr/openwifi-hw). 
+Our edits start on Mar 30, 2026.
+Full modification history is available in this repository's Git commit history.
+
 # openwifi-hw
 <img src="./openwifi-logo.png" width="300">
 
