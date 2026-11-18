@@ -88,7 +88,16 @@ wire [31:0] l_ltf;
 reg  [7:0] preamble_addr;
 reg  [7:0] num_stf;
 
-assign l_stf = preamble_addr >= num_stf? 0:l_stf_tmp;
+// assign l_stf = preamble_addr >= num_stf? 0:l_stf_tmp;
+localparam [7:0] CHIP_LEN_PWR = 8'd3; // Power of 2 for chip length, 2^3 = 8 samples per chip
+localparam [7:0] COV_PAYLOAD = 8'h55; // Test coverpayload 7 bits long
+wire [7:0] hole_offset = preamble_addr - num_stf; // Position inside hole
+wire [2:0] cov_bit_indx = hole_offset >> CHIP_LEN_PWR; // Convert to covert bit index (divide by CHIP LEN)
+wire       in_hole     = (preamble_addr >= num_stf); // are processing inside hole?
+wire       ook_on      = COV_PAYLOAD[cov_bit_indx];
+
+assign l_stf = in_hole ? (ook_on ? l_stf_tmp : 32'd0) : l_stf_tmp; // Put either existing sample or 0 for OOK.
+
 l_stf_rom l_stf_rom (
     .addr(preamble_addr),
     .dout(l_stf_tmp)
